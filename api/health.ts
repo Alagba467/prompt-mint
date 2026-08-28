@@ -8,8 +8,13 @@ async function handler(_req: any, res: any) {
   const version = negotiateVersion(_req, res);
   if (!version) return;
 
-  await connectDb();
-  const state = await IndexerState.findOne({ key: "prompt_hash_contract" });
+  let state = null;
+  try {
+    await connectDb();
+    state = await IndexerState.findOne({ key: "prompt_hash_contract" });
+  } catch (error) {
+    console.error("Health check DB error:", error);
+  }
 
   res.status(200).json(
     withVersion(
