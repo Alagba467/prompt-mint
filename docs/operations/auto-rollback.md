@@ -42,6 +42,32 @@ yarn ops:rollback --dry-run
 
 Or dispatch the workflow with **dry_run** enabled.
 
+## Reading Vercel deployment failure logs
+
+When a production deploy fails, the rollback automation uses Vercel's deployment status. To investigate the root cause:
+
+1. **List recent deployments** to identify the failed deployment ID:
+   ```bash
+   vercel ls --prod
+   ```
+   Or use the dashboard: https://vercel.com/dashboard → select project ↔ **Deployments**.
+
+2. **Inspect build logs** for the failed deployment. CLI:
+   ```bash
+   vercel logs <deployment-id>
+   ```
+   In the dashboard, open the deployment and choose **Build Logs**. Look for the first error (often TypeScript, Babel, or dependency errors).
+
+3. **Check runtime logs** if the deployment built but failed health checks:
+   ```bash
+   vercel logs <deployment-id> --json
+   ```
+   Search for `unhandled rejection`, `error`, `ECONNREFUSED`, or timeout messages.
+
+4. **Cross-reference environment variables** (required secrets above) to ensure the Vercel project has the same values as CI.
+
+Keep the logs with the incident ticket for later analysis.
+
 ## After a rollback
 
 1. Confirm `/api/health` and `/api/status` are green.
